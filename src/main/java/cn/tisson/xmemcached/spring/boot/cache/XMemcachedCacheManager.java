@@ -105,7 +105,7 @@ public class XMemcachedCacheManager extends AbstractTransactionSupportingCacheMa
             }
             if (expire > 0) {
                 // 缓存配置
-                XMemcachedCacheConfiguration config = new XMemcachedCacheConfiguration(cacheName, expire,
+                XMemcachedCacheConfiguration config = new XMemcachedCacheConfiguration(expire,
                         this.allowNullValues);
                 initialCacheConfiguration.put(cacheName, config);
             } else {

@@ -19,23 +19,13 @@ public class XMemcachedCacheWrapper implements Cache {
     @Override
     public String getName() {
         log.info("name: {}", cache.getName());
-        try {
-            return cache.getName();
-        } catch (Exception e) {
-            log.error("getName ---> errmsg: {}", e.getMessage(), e);
-            return null;
-        }
+        return cache.getName();
     }
 
     @Override
     public Object getNativeCache() {
         // log.info("nativeCache: {}", cache.getNativeCache());
-        try {
-            return cache.getNativeCache();
-        } catch (Exception e) {
-            log.error("getNativeCache ---> errmsg: {}", e.getMessage(), e);
-            return null;
-        }
+        return cache.getNativeCache();
     }
 
     @Override

@@ -16,7 +16,7 @@ public class XMemcachedCacheConfiguration {
      * @param expire          must not be {@literal null}.
      * @param allowNullValues must not be {@literal null}.
      */
-    public XMemcachedCacheConfiguration(String name, int expire, boolean allowNullValues) {
+    public XMemcachedCacheConfiguration(int expire, boolean allowNullValues) {
         this.expire = expire;
         this.allowNullValues = allowNullValues;
     }
