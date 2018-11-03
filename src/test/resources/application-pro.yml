@@ -1,0 +1,4 @@
+debug: false
+spring:
+  application:
+    name: xmemcached-spring-boot-starter
