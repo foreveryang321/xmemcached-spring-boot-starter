@@ -3,7 +3,7 @@ package cn.tisson.xmemcached.spring.boot.config.type;
 /**
  * 分布策略
  *
- * @author Created by YL on 2018/11/3
+ * @author YL
  */
 public enum SessionLocator {
     /**

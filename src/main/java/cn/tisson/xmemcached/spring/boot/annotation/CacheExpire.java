@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 /**
  * cache expire time annotation
  *
- * @author Created by YL on 2018/11/1
+ * @author YL
  */
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)

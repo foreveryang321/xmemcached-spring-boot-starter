@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
  *     主要注册 RedisTemplate、KeyGenerator、CacheManager
  * </pre>
  *
- * @author Created by YL on 2018/11/1
+ * @author YL
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

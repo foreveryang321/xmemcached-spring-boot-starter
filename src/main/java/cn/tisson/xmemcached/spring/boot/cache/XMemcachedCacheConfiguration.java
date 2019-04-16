@@ -3,7 +3,7 @@ package cn.tisson.xmemcached.spring.boot.cache;
 import lombok.Getter;
 
 /**
- * @author Created by YL on 2018/11/2
+ * @author YL
  */
 @Getter
 public class XMemcachedCacheConfiguration {

@@ -11,7 +11,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * {@link org.springframework.cache.Cache} implementation using for Memcached as underlying store.
  *
- * @author Created by YL on 2018/11/2
+ * @author YL
  */
 public class XMemcachedCache extends AbstractValueAdaptingCache {
     private String name;

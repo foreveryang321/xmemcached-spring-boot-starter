@@ -6,7 +6,7 @@ import org.springframework.cache.Cache;
 import java.util.concurrent.Callable;
 
 /**
- * @author Created by YL on 2018/11/2
+ * @author YL
  */
 @Slf4j
 public class XMemcachedCacheWrapper implements Cache {
@@ -18,7 +18,9 @@ public class XMemcachedCacheWrapper implements Cache {
 
     @Override
     public String getName() {
-        log.info("name: {}", cache.getName());
+        if (log.isDebugEnabled()) {
+            log.debug("name: {}", cache.getName());
+        }
         return cache.getName();
     }
 
@@ -30,7 +32,9 @@ public class XMemcachedCacheWrapper implements Cache {
 
     @Override
     public ValueWrapper get(Object o) {
-        log.info("get ---> o: {}", o);
+        if (log.isDebugEnabled()) {
+            log.debug("get ---> o: {}", o);
+        }
         try {
             return cache.get(o);
         } catch (Exception e) {
@@ -41,7 +45,9 @@ public class XMemcachedCacheWrapper implements Cache {
 
     @Override
     public <T> T get(Object o, Class<T> aClass) {
-        log.info("get ---> o: {}, clazz: {}", o, aClass);
+        if (log.isDebugEnabled()) {
+            log.debug("get ---> o: {}, clazz: {}", o, aClass);
+        }
         try {
             return cache.get(o, aClass);
         } catch (Exception e) {
@@ -52,7 +58,9 @@ public class XMemcachedCacheWrapper implements Cache {
 
     @Override
     public <T> T get(Object o, Callable<T> callable) {
-        log.info("get ---> o: {}", o);
+        if (log.isDebugEnabled()) {
+            log.debug("get ---> o: {}", o);
+        }
         try {
             return cache.get(o, callable);
         } catch (Exception e) {
@@ -63,7 +71,9 @@ public class XMemcachedCacheWrapper implements Cache {
 
     @Override
     public void put(Object o, Object o1) {
-        log.info("put ---> o: {}, o1: {}", o, o1);
+        if (log.isDebugEnabled()) {
+            log.debug("put ---> o: {}, o1: {}", o, o1);
+        }
         try {
             cache.put(o, o1);
         } catch (Exception e) {
@@ -73,7 +83,9 @@ public class XMemcachedCacheWrapper implements Cache {
 
     @Override
     public ValueWrapper putIfAbsent(Object o, Object o1) {
-        log.info("putIfAbsent ---> o: {}, o1: {}", o, o1);
+        if (log.isDebugEnabled()) {
+            log.debug("putIfAbsent ---> o: {}, o1: {}", o, o1);
+        }
         try {
             return cache.putIfAbsent(o, o1);
         } catch (Exception e) {
@@ -84,7 +96,9 @@ public class XMemcachedCacheWrapper implements Cache {
 
     @Override
     public void evict(Object o) {
-        log.info("evict ---> o: {}", o);
+        if (log.isDebugEnabled()) {
+            log.debug("evict ---> o: {}", o);
+        }
         try {
             cache.evict(o);
         } catch (Exception e) {
@@ -94,7 +108,9 @@ public class XMemcachedCacheWrapper implements Cache {
 
     @Override
     public void clear() {
-        log.info("clear");
+        if (log.isDebugEnabled()) {
+            log.debug("clear");
+        }
         try {
             cache.clear();
         } catch (Exception e) {

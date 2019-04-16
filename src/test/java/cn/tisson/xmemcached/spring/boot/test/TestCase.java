@@ -8,7 +8,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
- * @author Created by YL on 2018/11/1
+ * @author YL
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = App.class)

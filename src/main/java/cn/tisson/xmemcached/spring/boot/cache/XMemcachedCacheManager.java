@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author Created by YL on 2018/11/2
+ * @author YL
  */
 @Slf4j
 public class XMemcachedCacheManager extends AbstractTransactionSupportingCacheManager

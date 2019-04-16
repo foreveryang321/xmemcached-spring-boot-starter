@@ -4,7 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @author Created by YL on 2018/11/2
+ * @author YL
  */
 @Data
 @NoArgsConstructor
@@ -18,9 +18,9 @@ public class SocketOptions {
     // map.put(StandardSocketOption.SO_REUSEADDR, true);
 
     private boolean tcpNoDelay = true;
-    private int soRcvBuf = 65536;
-    private boolean soKeepAlive = true;
-    private String soSndBuf = "xmemcached-spring-boot-starter";
-    private int soLinger = 0;
-    private boolean soReUseDddr = true;
+    private int rcvBuf = 65536;
+    private boolean keepAlive = true;
+    private String sndBuf = "xmemcached-spring-boot-starter";
+    private int linger = 0;
+    private boolean reUseDddr = true;
 }

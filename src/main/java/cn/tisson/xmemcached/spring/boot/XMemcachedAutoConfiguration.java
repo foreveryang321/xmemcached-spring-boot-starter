@@ -4,7 +4,6 @@ import cn.tisson.xmemcached.spring.boot.annotation.EnableXMemcachedConfiguration
 import cn.tisson.xmemcached.spring.boot.cache.XMemcachedCacheManager;
 import cn.tisson.xmemcached.spring.boot.config.XMemcachedProperties;
 import cn.tisson.xmemcached.spring.boot.factory.XMemcacheClientFactory;
-import lombok.extern.slf4j.Slf4j;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,7 @@ import org.springframework.context.annotation.Configuration;
 import java.io.IOException;
 
 /**
- * @author Created by YL on 2018/11/1
+ * @author YL
  */
 @Configuration
 @ConditionalOnBean(annotation = {
@@ -33,7 +32,6 @@ import java.io.IOException;
         XMemcachedProperties.class
 })
 @EnableCaching(proxyTargetClass = true)
-@Slf4j
 public class XMemcachedAutoConfiguration extends CachingConfigurerSupport {
     private XMemcachedProperties xMemcachedProperties;
 

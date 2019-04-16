@@ -9,6 +9,7 @@ import cn.tisson.xmemcached.spring.boot.listener.ReconnectListener;
 import com.google.code.yanf4j.config.Configuration;
 import com.google.code.yanf4j.core.impl.StandardSocketOption;
 import com.google.code.yanf4j.util.SystemUtils;
+import lombok.extern.slf4j.Slf4j;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.command.BinaryCommandFactory;
@@ -27,8 +28,9 @@ import net.rubyeye.xmemcached.utils.Protocol;
 import java.io.IOException;
 
 /**
- * @author Created by YL on 2018/11/2
+ * @author YL
  */
+@Slf4j
 public class XMemcacheClientFactory {
     public XMemcacheClientFactory() {}
 
@@ -48,17 +50,17 @@ public class XMemcacheClientFactory {
 
         builder.setOpTimeout(conf.getOpTimeout());
 
+        builder.setEnableHealSession(conf.isEnableHealSession());
+
         builder.setFailureMode(conf.isFailureMode());
 
-        // if (conf.getSanitizeKeys() != null) {
-        //     builder.setSanitizeKeys(conf.getSanitizeKeys());
-        // }
+        builder.setSanitizeKeys(conf.isSanitizeKey());
+
+        // builder.setMaxQueuedNoReplyOperations(conf.getMaxQueuedNoReplyOperations());
 
         SessionLocator sessionLocator = conf.getSessionLocator();
-        this.setSessionLocator(builder, sessionLocator);
-
         CommandFactory commandFactory = conf.getCommandFactory();
-        this.setCommandFactory(builder, commandFactory);
+        this.configureCommandFactoryAndSessionLocator(builder, commandFactory, sessionLocator);
 
         SocketOptions socketOptions = conf.getSocketOptions();
         this.setSocketOptions(builder, socketOptions);
@@ -73,14 +75,27 @@ public class XMemcacheClientFactory {
         this.setProviderBuilderSpecificSettings(builder, conf);
 
         MemcachedClient client = builder.build();
-        this.setClientOptions(builder, client, conf);
+        this.configureClient(builder, client, conf);
         return client;
     }
 
     /**
-     * 分布策略
+     * 协议工场、分布策略配置
+     *
+     * @param builder        {@link  XMemcachedClientBuilder}
+     * @param command        协议工场
+     * @param sessionLocator 分布策略
      */
-    private void setSessionLocator(XMemcachedClientBuilder builder, SessionLocator sessionLocator) {
+    private void configureCommandFactoryAndSessionLocator(XMemcachedClientBuilder builder, CommandFactory command,
+                                                          SessionLocator sessionLocator) {
+        if (CommandFactory.Binary.equals(command)) {
+            builder.setCommandFactory(new BinaryCommandFactory());
+        } else if (CommandFactory.Text.equals(command)) {
+            builder.setCommandFactory(new TextCommandFactory());
+        } else if (CommandFactory.Kestrel.equals(command)) {
+            builder.setCommandFactory(new KestrelCommandFactory());
+        }
+
         if (SessionLocator.Ketam.equals(sessionLocator)) {
             builder.setSessionLocator(new KetamaMemcachedSessionLocator());
         } else if (SessionLocator.Array.equals(sessionLocator)) {
@@ -96,18 +111,14 @@ public class XMemcacheClientFactory {
         } else if (SessionLocator.RoundRobin.equals(sessionLocator)) {
             builder.setSessionLocator(new RoundRobinMemcachedSessionLocator());
         }
-    }
-
-    /**
-     * 协议工场
-     */
-    private void setCommandFactory(XMemcachedClientBuilder builder, CommandFactory command) {
-        if (CommandFactory.Binary.equals(command)) {
-            builder.setCommandFactory(new BinaryCommandFactory());
-        } else if (CommandFactory.Text.equals(command)) {
-            builder.setCommandFactory(new TextCommandFactory());
-        } else if (CommandFactory.Kestrel.equals(command)) {
-            builder.setCommandFactory(new KestrelCommandFactory());
+        // kestrel protocol use random session locator.
+        if (builder.getCommandFactory().getProtocol() == Protocol.Kestrel) {
+            if (!(builder.getSessionLocator() instanceof RandomMemcachedSessionLocaltor)) {
+                log.warn(
+                        "Switch `net.rubyeye.xmemcached.impl.RandomMemcachedSessionLocaltor` as session " +
+                                "locator for kestrel protocol.");
+                builder.setSessionLocator(new RandomMemcachedSessionLocaltor());
+            }
         }
     }
 
@@ -116,11 +127,11 @@ public class XMemcacheClientFactory {
      */
     private void setSocketOptions(XMemcachedClientBuilder builder, SocketOptions socket) {
         builder.setSocketOption(StandardSocketOption.TCP_NODELAY, socket.isTcpNoDelay());
-        builder.setSocketOption(StandardSocketOption.SO_RCVBUF, socket.getSoRcvBuf());
-        builder.setSocketOption(StandardSocketOption.SO_KEEPALIVE, socket.isSoKeepAlive());
-        builder.setSocketOption(StandardSocketOption.SO_SNDBUF, socket.getSoSndBuf());
-        builder.setSocketOption(StandardSocketOption.SO_LINGER, socket.getSoLinger());
-        builder.setSocketOption(StandardSocketOption.SO_REUSEADDR, socket.isSoReUseDddr());
+        builder.setSocketOption(StandardSocketOption.SO_RCVBUF, socket.getRcvBuf());
+        builder.setSocketOption(StandardSocketOption.SO_KEEPALIVE, socket.isKeepAlive());
+        builder.setSocketOption(StandardSocketOption.SO_SNDBUF, socket.getSndBuf());
+        builder.setSocketOption(StandardSocketOption.SO_LINGER, socket.getLinger());
+        builder.setSocketOption(StandardSocketOption.SO_REUSEADDR, socket.isReUseDddr());
     }
 
     private void setConfiguration(XMemcachedClientBuilder builder, ConfigOptions options) {
@@ -150,14 +161,6 @@ public class XMemcacheClientFactory {
         //     builder.setTranscoder(new SerializingTranscoder());
         // }
         //
-        // if (prop.getMaxQueuedNoReplyOperations() != null) {
-        //     builder.setMaxQueuedNoReplyOperations(prop.getMaxQueuedNoReplyOperations());
-        // }
-        //
-        // if (prop.getEnableHealSession() != null) {
-        //     builder.setEnableHealSession(prop.getEnableHealSession());
-        // }
-        //
         // if (prop.getAuthInfoMap() != null) {
         //     builder.setAuthInfoMap(prop.getAuthInfoMap());
         // }
@@ -166,38 +169,27 @@ public class XMemcacheClientFactory {
     // protected void configureClient(XMemcachedClientBuilder builder, XMemcachedClient client,
     //                                XMemcachedProperties conf) {
     //     client.setKeyProvider(this.keyProvider);
-    //     client.setHealSessionInterval(this.healSessionInterval);
-    //     client.setEnableHealSession(conf.isEnableHealSession());
-    //     // client.setMaxQueuedNoReplyOperations(this.maxQueuedNoReplyOperations);
     // }
 
-    private void setClientOptions(XMemcachedClientBuilder builder, MemcachedClient client,
-                                  XMemcachedProperties conf) {
+    private void configureClient(XMemcachedClientBuilder builder, MemcachedClient client,
+                                 XMemcachedProperties conf) {
         if (builder.getCommandFactory().getProtocol() == Protocol.Kestrel) {
             client.setOptimizeGet(false);
         } else {
             client.setOptimizeGet(conf.isOptimizeGet());
         }
 
-        // if (conf.getEnableHeartBeat() != null) {
-        //     client.setEnableHeartBeat(conf.getEnableHeartBeat());
-        // }
-        //
-        // if (conf.getHealSessionInterval() != null) {
-        //     client.setHealSessionInterval(conf.getHealSessionInterval());
-        // }
-        //
-        // if (conf.getMergeFactor() != null) {
-        //     client.setMergeFactor(conf.getMergeFactor());
-        // }
-        //
-        // if (conf.getOptimizeMergeBuffer() != null) {
-        //     client.setOptimizeMergeBuffer(conf.getOptimizeMergeBuffer());
-        // }
-        //
-        // if (conf.getPrimitiveAsString() != null) {
-        //     client.setPrimitiveAsString(conf.getPrimitiveAsString());
-        // }
-        //
+        client.setEnableHeartBeat(conf.isEnableHeartBeat());
+
+        if (conf.getHealConnectionInterval() > 0) {
+            client.setHealSessionInterval(conf.getHealConnectionInterval());
+        }
+
+        if (conf.getMergeFactor() > 0) {
+            client.setMergeFactor(conf.getMergeFactor());
+        }
+
+        client.setOptimizeMergeBuffer(conf.isOptimizeMergeBuffer());
+        client.setPrimitiveAsString(conf.isPrimitiveAsString());
     }
 }
