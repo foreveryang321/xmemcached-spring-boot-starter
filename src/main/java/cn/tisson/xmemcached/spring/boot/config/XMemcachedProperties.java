@@ -85,17 +85,17 @@ public class XMemcachedProperties {
     // private int maxQueuedNoReplyOperations;
 
     /**
-     * 分布策略
+     * 分布策略. default: Array
      */
     private SessionLocator sessionLocator = SessionLocator.Array;
     /**
-     * 协议工场
+     * 协议工场. default: Text
      */
     private CommandFactory commandFactory = CommandFactory.Text;
 
     @NestedConfigurationProperty
-    private ConfigOptions configOptions;
+    private ConfigOptions configOptions = new ConfigOptions();
 
     @NestedConfigurationProperty
-    private SocketOptions socketOptions;
+    private SocketOptions socketOptions = new SocketOptions();
 }

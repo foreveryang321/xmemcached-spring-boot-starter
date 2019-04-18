@@ -1,8 +1,0 @@
-debug: false
-spring:
-  application:
-    name: xmemcached-spring-boot-starter
-  xmemcached:
-    address: 10.121.22.128:12200
-    command-factory: binary
-    session-locator: ketam

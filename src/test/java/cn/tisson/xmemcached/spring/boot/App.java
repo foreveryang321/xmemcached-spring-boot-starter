@@ -1,6 +1,6 @@
 package cn.tisson.xmemcached.spring.boot;
 
-import cn.tisson.xmemcached.spring.boot.annotation.EnableXMemcachedConfiguration;
+import cn.tisson.xmemcached.spring.boot.anno.EnableXMemcachedConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 
@@ -14,17 +14,8 @@ public class App {
      * Common
      */
     private static SpringApplicationBuilder configureSpringBuilder(SpringApplicationBuilder builder) {
-        // builder.listeners(new EnvironmentPreparedEventListener());
         return builder.sources(App.class);
     }
-
-    // /**
-    //  * for WAR deploy
-    //  */
-    // @Override
-    // protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
-    //     return configureSpringBuilder(builder);
-    // }
 
     /**
      * for JAR deploy

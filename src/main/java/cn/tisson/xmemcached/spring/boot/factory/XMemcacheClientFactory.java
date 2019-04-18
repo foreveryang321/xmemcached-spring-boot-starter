@@ -131,7 +131,7 @@ public class XMemcacheClientFactory {
         builder.setSocketOption(StandardSocketOption.SO_KEEPALIVE, socket.isKeepAlive());
         builder.setSocketOption(StandardSocketOption.SO_SNDBUF, socket.getSndBuf());
         builder.setSocketOption(StandardSocketOption.SO_LINGER, socket.getLinger());
-        builder.setSocketOption(StandardSocketOption.SO_REUSEADDR, socket.isReUseDddr());
+        builder.setSocketOption(StandardSocketOption.SO_REUSEADDR, socket.isReUseAddr());
     }
 
     private void setConfiguration(XMemcachedClientBuilder builder, ConfigOptions options) {

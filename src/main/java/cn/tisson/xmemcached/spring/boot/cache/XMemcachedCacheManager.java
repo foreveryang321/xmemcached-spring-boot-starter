@@ -1,6 +1,6 @@
 package cn.tisson.xmemcached.spring.boot.cache;
 
-import cn.tisson.xmemcached.spring.boot.annotation.CacheExpire;
+import cn.tisson.xmemcached.spring.boot.anno.Expired;
 import cn.tisson.xmemcached.spring.boot.util.CacheUtils;
 import lombok.extern.slf4j.Slf4j;
 import net.rubyeye.xmemcached.MemcachedClient;
@@ -30,7 +30,7 @@ public class XMemcachedCacheManager extends AbstractTransactionSupportingCacheMa
         implements ApplicationContextAware, InitializingBean {
     private MemcachedClient memcachedClient;
     private boolean allowNullValues;
-    private Map<String, XMemcachedCacheConfiguration> initialCacheConfiguration = new LinkedHashMap<>();
+    private Map<String, XMemcachedCacheProperties> initialCacheConfiguration = new LinkedHashMap<>();
 
     private ApplicationContext applicationContext;
 
@@ -58,7 +58,7 @@ public class XMemcachedCacheManager extends AbstractTransactionSupportingCacheMa
     protected Collection<XMemcachedCache> loadCaches() {
         List<XMemcachedCache> caches = new LinkedList<>();
 
-        for (Map.Entry<String, XMemcachedCacheConfiguration> entry : initialCacheConfiguration.entrySet()) {
+        for (Map.Entry<String, XMemcachedCacheProperties> entry : initialCacheConfiguration.entrySet()) {
             caches.add(createCache(entry.getKey(), entry.getValue()));
         }
         return caches;
@@ -71,13 +71,13 @@ public class XMemcachedCacheManager extends AbstractTransactionSupportingCacheMa
     }
 
     /**
-     * Configuration hook for creating {@link XMemcachedCache} with given name and {@link XMemcachedCacheConfiguration}.
+     * Configuration hook for creating {@link XMemcachedCache} with given name and {@link XMemcachedCacheProperties}.
      *
-     * @param name          must not be {@literal null}.
-     * @param configuration can be {@literal null}.
+     * @param name       must not be {@literal null}.
+     * @param properties can be {@literal null}.
      */
-    private XMemcachedCache createCache(String name, XMemcachedCacheConfiguration configuration) {
-        return new XMemcachedCache(name, configuration.getExpire(), memcachedClient, configuration.isAllowNullValues());
+    private XMemcachedCache createCache(String name, XMemcachedCacheProperties properties) {
+        return new XMemcachedCache(name, properties.getExpire(), memcachedClient, properties.isAllowNullValues());
     }
 
     private void doWith(final Class clazz) {
@@ -87,27 +87,29 @@ public class XMemcachedCacheManager extends AbstractTransactionSupportingCacheMa
             Caching caching = AnnotationUtils.findAnnotation(method, Caching.class);
             CacheConfig cacheConfig = AnnotationUtils.findAnnotation(clazz, CacheConfig.class);
             // 自定义注解
-            CacheExpire cacheExpire = AnnotationUtils.findAnnotation(method, CacheExpire.class);
+            Expired expired = AnnotationUtils.findAnnotation(method, Expired.class);
 
             List<String> cacheNames = CacheUtils.getCacheNames(cacheable, caching, cacheConfig);
-            add(cacheNames, cacheExpire);
-        }, method -> null != AnnotationUtils.findAnnotation(method, CacheExpire.class));
+            add(cacheNames, expired);
+        }, method -> null != AnnotationUtils.findAnnotation(method, Expired.class));
     }
 
-    private void add(List<String> cacheNames, CacheExpire cacheExpire) {
+    private void add(List<String> cacheNames, Expired expired) {
         for (String cacheName : cacheNames) {
             if (cacheName == null || "".equals(cacheName.trim())) {
                 continue;
             }
-            int expire = cacheExpire.value();
+            int expire = expired.value();
             if (log.isInfoEnabled()) {
                 log.info("cacheNames: {}, expire: {}s", cacheNames, expire);
             }
             if (expire > 0) {
                 // 缓存配置
-                XMemcachedCacheConfiguration config = new XMemcachedCacheConfiguration(expire,
-                        this.allowNullValues);
-                initialCacheConfiguration.put(cacheName, config);
+                XMemcachedCacheProperties properties = new XMemcachedCacheProperties(
+                        expire,
+                        this.allowNullValues
+                );
+                initialCacheConfiguration.put(cacheName, properties);
             } else {
                 log.warn("{} use default expiration.", cacheName);
             }

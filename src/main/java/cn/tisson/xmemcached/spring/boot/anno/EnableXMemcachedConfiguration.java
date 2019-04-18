@@ -1,4 +1,4 @@
-package cn.tisson.xmemcached.spring.boot.annotation;
+package cn.tisson.xmemcached.spring.boot.anno;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

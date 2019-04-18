@@ -1,4 +1,4 @@
-package cn.tisson.xmemcached.spring.boot.annotation;
+package cn.tisson.xmemcached.spring.boot.anno;
 
 import org.springframework.core.annotation.AliasFor;
 
@@ -18,7 +18,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
-public @interface CacheExpire {
+public @interface Expired {
     /**
      * expire time, default 60s.
      */
