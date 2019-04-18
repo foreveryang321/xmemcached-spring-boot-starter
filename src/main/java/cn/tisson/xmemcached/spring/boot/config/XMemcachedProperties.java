@@ -6,6 +6,7 @@ import cn.tisson.xmemcached.spring.boot.config.type.CommandFactory;
 import cn.tisson.xmemcached.spring.boot.config.type.SessionLocator;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.rubyeye.xmemcached.impl.Optimizer;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
@@ -24,7 +25,12 @@ public class XMemcachedProperties {
     private int connectionPoolSize = 1;
 
     private long opTimeout = 5000;
-    private boolean optimizeGet = false;
+    private boolean optimizeGet = true;
+    /**
+     * Enable/Disable merge many command's buffers to one big buffer fit socket's send buffer
+     * size.Default is true.Recommend true.
+     */
+    private boolean optimizeMergeBuffer = true;
 
     private boolean failureMode = false;
 
@@ -40,12 +46,7 @@ public class XMemcachedProperties {
      * Set the merge factor,this factor determins how many 'get' commands would be merge to one
      * multi-get command.default is 150
      */
-    private int mergeFactor = 150;
-    /**
-     * Enable/Disable merge many command's buffers to one big buffer fit socket's send buffer
-     * size.Default is true.Recommend true.
-     */
-    private boolean optimizeMergeBuffer = true;
+    private int mergeFactor = Optimizer.DEFAULT_MERGE_FACTOR;
 
     /**
      * If the memcached dump or network error cause connection closed,xmemcached would try to heal the
