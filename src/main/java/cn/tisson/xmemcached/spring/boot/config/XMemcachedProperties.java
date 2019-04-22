@@ -6,6 +6,7 @@ import cn.tisson.xmemcached.spring.boot.config.type.CommandFactory;
 import cn.tisson.xmemcached.spring.boot.config.type.SessionLocator;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.impl.Optimizer;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
@@ -24,6 +25,14 @@ public class XMemcachedProperties {
 
     private int connectionPoolSize = 1;
 
+    /**
+     * global expire time
+     * <p>
+     * default：3600s
+     * </p>
+     */
+    private int expire = 3600;
+
     private long opTimeout = 5000;
     private boolean optimizeGet = true;
     /**
@@ -34,6 +43,12 @@ public class XMemcachedProperties {
 
     private boolean failureMode = false;
 
+    /**
+     * global allow null values
+     * <p>
+     * default：false
+     * </p>
+     */
     private boolean allowNullValues = false;
 
     /**
@@ -45,8 +60,10 @@ public class XMemcachedProperties {
     /**
      * Set the merge factor,this factor determins how many 'get' commands would be merge to one
      * multi-get command.default is 150
+     *
+     * @see Optimizer#DEFAULT_MERGE_FACTOR
      */
-    private int mergeFactor = Optimizer.DEFAULT_MERGE_FACTOR;
+    private int mergeFactor = 50;
 
     /**
      * If the memcached dump or network error cause connection closed,xmemcached would try to heal the
@@ -86,11 +103,11 @@ public class XMemcachedProperties {
     // private int maxQueuedNoReplyOperations;
 
     /**
-     * 分布策略. default: Array
+     * SessionLocator
      */
     private SessionLocator sessionLocator = SessionLocator.Array;
     /**
-     * 协议工场. default: Text
+     * CommandFactory
      */
     private CommandFactory commandFactory = CommandFactory.Text;
 

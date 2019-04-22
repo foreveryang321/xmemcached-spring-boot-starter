@@ -10,10 +10,22 @@ import net.rubyeye.xmemcached.MemcachedClient;
 @Data
 @NoArgsConstructor
 public class SocketOptions {
-    private boolean tcpNoDelay = MemcachedClient.DEFAULT_TCP_NO_DELAY;
-    private int rcvBuf = MemcachedClient.DEFAULT_TCP_RECV_BUFF_SIZE;
-    private boolean keepAlive = MemcachedClient.DEFAULT_TCP_KEEPLIVE;
-    private int sndBuf = MemcachedClient.DEFAULT_TCP_SEND_BUFF_SIZE;
+    /**
+     * @see MemcachedClient#DEFAULT_TCP_NO_DELAY
+     */
+    private boolean tcpNoDelay = true;
+    /**
+     * @see MemcachedClient#DEFAULT_TCP_RECV_BUFF_SIZE
+     */
+    private int rcvBuf = 65536;
+    /**
+     * @see MemcachedClient#DEFAULT_TCP_KEEPLIVE
+     */
+    private boolean keepAlive = true;
+    /**
+     * @see MemcachedClient#DEFAULT_TCP_SEND_BUFF_SIZE
+     */
+    private int sndBuf = 32768;
     private int linger = 0;
     private boolean reUseAddr = true;
 }

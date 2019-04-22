@@ -5,3 +5,6 @@ spring:
     address: 10.121.22.128:12200
     command-factory: binary
     session-locator: ketam
+    socket-options:
+      tcp-no-delay: true
+      keep-alive: true

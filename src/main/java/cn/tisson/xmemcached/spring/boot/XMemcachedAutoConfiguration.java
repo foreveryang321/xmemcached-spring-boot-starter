@@ -45,6 +45,10 @@ public class XMemcachedAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(CacheManager.class)
     public XMemcachedCacheManager cacheManager(MemcachedClient memcachedClient) {
-        return new XMemcachedCacheManager(memcachedClient, xMemcachedProperties.isAllowNullValues());
+        return new XMemcachedCacheManager(
+                memcachedClient,
+                xMemcachedProperties.getExpire(),
+                xMemcachedProperties.isAllowNullValues()
+        );
     }
 }

@@ -30,4 +30,9 @@ public @interface Expired {
      */
     @AliasFor("value")
     int expire() default 60;
+
+    /**
+     * whether allow null values
+     */
+    boolean allowNullValues() default false;
 }

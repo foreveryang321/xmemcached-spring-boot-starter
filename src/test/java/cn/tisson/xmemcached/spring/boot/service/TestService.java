@@ -26,7 +26,6 @@ public class TestService {
     }
 
     @Cacheable(cacheNames = "put", key = "#p0", unless = "#result eq null")
-    @Expired
     public Map<String, Object> put(String name) {
         Map<String, Object> map = new HashMap<>();
         map.put("name", name);

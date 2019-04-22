@@ -29,13 +29,15 @@ import java.util.Map;
 public class XMemcachedCacheManager extends AbstractTransactionSupportingCacheManager
         implements ApplicationContextAware, InitializingBean {
     private MemcachedClient memcachedClient;
+    private int grobalExpire;
     private boolean allowNullValues;
     private Map<String, XMemcachedCacheProperties> initialCacheConfiguration = new LinkedHashMap<>();
 
     private ApplicationContext applicationContext;
 
-    public XMemcachedCacheManager(MemcachedClient memcachedClient, boolean allowNullValues) {
+    public XMemcachedCacheManager(MemcachedClient memcachedClient, int grobalExpire, boolean allowNullValues) {
         this.memcachedClient = memcachedClient;
+        this.grobalExpire = grobalExpire;
         this.allowNullValues = allowNullValues;
     }
 
@@ -82,16 +84,21 @@ public class XMemcachedCacheManager extends AbstractTransactionSupportingCacheMa
 
     private void doWith(final Class clazz) {
         ReflectionUtils.doWithMethods(clazz, method -> {
-            ReflectionUtils.makeAccessible(method);
-            Cacheable cacheable = AnnotationUtils.findAnnotation(method, Cacheable.class);
-            Caching caching = AnnotationUtils.findAnnotation(method, Caching.class);
-            CacheConfig cacheConfig = AnnotationUtils.findAnnotation(clazz, CacheConfig.class);
-            // 自定义注解
-            Expired expired = AnnotationUtils.findAnnotation(method, Expired.class);
+                    ReflectionUtils.makeAccessible(method);
+                    Cacheable cacheable = AnnotationUtils.findAnnotation(method, Cacheable.class);
+                    Caching caching = AnnotationUtils.findAnnotation(method, Caching.class);
+                    CacheConfig cacheConfig = AnnotationUtils.findAnnotation(clazz, CacheConfig.class);
+                    // 自定义注解
+                    Expired expired = AnnotationUtils.findAnnotation(method, Expired.class);
 
-            List<String> cacheNames = CacheUtils.getCacheNames(cacheable, caching, cacheConfig);
-            add(cacheNames, expired);
-        }, method -> null != AnnotationUtils.findAnnotation(method, Expired.class));
+                    List<String> cacheNames = CacheUtils.getCacheNames(cacheable, caching, cacheConfig);
+                    add(cacheNames, expired);
+                }, method ->
+                        null != AnnotationUtils.findAnnotation(method, Cacheable.class)
+                                || null != AnnotationUtils.findAnnotation(method, Caching.class)
+                                || null != AnnotationUtils.findAnnotation(method, CacheConfig.class)
+                                || null != AnnotationUtils.findAnnotation(method, Expired.class)
+        );
     }
 
     private void add(List<String> cacheNames, Expired expired) {
@@ -99,20 +106,51 @@ public class XMemcachedCacheManager extends AbstractTransactionSupportingCacheMa
             if (cacheName == null || "".equals(cacheName.trim())) {
                 continue;
             }
-            int expire = expired.value();
-            if (log.isInfoEnabled()) {
-                log.info("cacheNames: {}, expire: {}s", cacheNames, expire);
+            if (initialCacheConfiguration.get(cacheName) != null) {
+                return;
             }
-            if (expire > 0) {
-                // 缓存配置
-                XMemcachedCacheProperties properties = new XMemcachedCacheProperties(
-                        expire,
-                        this.allowNullValues
-                );
-                initialCacheConfiguration.put(cacheName, properties);
+            int expire;
+            boolean allowNullValues;
+            // 没有配置 @Expired 注解的情况，使用全局配置
+            if (expired == null) {
+                expire = this.grobalExpire;
+                allowNullValues = this.allowNullValues;
+                if (log.isWarnEnabled()) {
+                    log.warn("Use global configuration. cacheName: {}, expire: {}s, allowNullValues: {}",
+                            cacheName,
+                            expire,
+                            allowNullValues
+                    );
+                }
             } else {
-                log.warn("{} use default expiration.", cacheName);
+                // 如果过期时间配置小于等于0，则不过期
+                expire = expired.value();
+                allowNullValues = expired.allowNullValues();
+                if (expire > 0) {
+                    if (log.isInfoEnabled()) {
+                        log.info("Custom configuration. cacheName: {}, expire: {}s, allowNullValues: {}",
+                                cacheName,
+                                expire,
+                                expired.allowNullValues()
+                        );
+                    }
+                } else {
+                    expire = 0;
+                    if (log.isWarnEnabled()) {
+                        log.warn("Custom configuration. cacheName: {}, expire: {}s, allowNullValues: {}",
+                                cacheName,
+                                expire,
+                                expired.allowNullValues()
+                        );
+                    }
+                }
             }
+            // 缓存配置
+            XMemcachedCacheProperties properties = new XMemcachedCacheProperties(
+                    expire,
+                    allowNullValues
+            );
+            initialCacheConfiguration.put(cacheName, properties);
         }
     }
 }
