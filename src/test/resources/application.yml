@@ -3,6 +3,8 @@ spring:
     name: xmemcached-spring-boot-starter
   xmemcached:
     address: 10.121.22.128:12200
+    expire: 60
+    allow-null-values: true
     command-factory: binary
     session-locator: ketam
     socket-options:
