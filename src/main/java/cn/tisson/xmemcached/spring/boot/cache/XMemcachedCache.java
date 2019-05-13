@@ -77,7 +77,8 @@ public class XMemcachedCache extends AbstractValueAdaptingCache {
         try {
             memcachedClient.set((String) key, expire, value);
         } catch (TimeoutException | InterruptedException | MemcachedException e) {
-            e.printStackTrace();
+            // 如果写入时出现异常，则删除缓存（防止db、缓存数据不一致，不太优雅的解决法案）
+            this.evict(key);
         }
     }
 
@@ -94,7 +95,8 @@ public class XMemcachedCache extends AbstractValueAdaptingCache {
                 return this.toValueWrapper(value);
             }
         } catch (TimeoutException | InterruptedException | MemcachedException e) {
-            e.printStackTrace();
+            // 如果写入时出现异常，则删除缓存（防止db、缓存数据不一致，不太优雅的解决法案）
+            this.evict(key);
         }
         return null;
     }
