@@ -3,7 +3,7 @@
     <property name="logger.charset" value="UTF-8"/>
 
     <property name="logger.pattern"
-              value="%d{yy-MM-dd HH:mm:ss} %highlight(%p) %yellow(%t) %cyan(%c.%M\\(%L\\)) | %m%n"/>
+              value="%d{yy-MM-dd HH:mm:ss} %highlight(%p) %yellow(%t) %cyan(%c{2}.%M\\(%L\\)) | %m%n"/>
     <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
         <encoder charset="${logger.charset}">
             <pattern>${logger.pattern}</pattern>

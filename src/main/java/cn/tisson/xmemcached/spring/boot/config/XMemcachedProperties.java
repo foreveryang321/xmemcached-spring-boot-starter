@@ -16,7 +16,7 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
  */
 @Data
 @NoArgsConstructor
-@ConfigurationProperties(prefix = "spring.xmemcached")
+@ConfigurationProperties(prefix = "ts.xmemcached")
 public class XMemcachedProperties {
     private String address;
     private int[] weights;
