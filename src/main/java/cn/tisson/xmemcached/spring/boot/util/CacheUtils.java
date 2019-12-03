@@ -17,7 +17,7 @@ public class CacheUtils {
     /**
      * 获取 cacheNames
      * <pre>
-     *     处理优先级 cacheable > caching > cacheConfig
+     *     处理优先级 cacheable = caching > cacheConfig
      * </pre>
      *
      * @param cacheable   缓存注解 Cacheable
@@ -32,9 +32,6 @@ public class CacheUtils {
             if (cacheNames.length > 0) {
                 list.addAll(Arrays.asList(cacheNames));
             }
-        }
-        if (list.size() > 0) {
-            return list;
         }
 
         // Caching

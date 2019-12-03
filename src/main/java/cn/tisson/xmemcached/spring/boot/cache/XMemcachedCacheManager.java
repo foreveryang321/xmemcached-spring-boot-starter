@@ -21,6 +21,8 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author YL
@@ -50,7 +52,7 @@ public class XMemcachedCacheManager extends AbstractTransactionSupportingCacheMa
     public void afterPropertiesSet() {
         String[] beanNames = applicationContext.getBeanNamesForType(Object.class);
         for (String beanName : beanNames) {
-            final Class clazz = applicationContext.getType(beanName);
+            final Class<?> clazz = applicationContext.getType(beanName);
             doWith(clazz);
         }
         super.afterPropertiesSet();
@@ -59,7 +61,6 @@ public class XMemcachedCacheManager extends AbstractTransactionSupportingCacheMa
     @Override
     protected Collection<XMemcachedCache> loadCaches() {
         List<XMemcachedCache> caches = new LinkedList<>();
-
         for (Map.Entry<String, XMemcachedCacheProperties> entry : initialCacheConfiguration.entrySet()) {
             caches.add(createCache(entry.getKey(), entry.getValue()));
         }
@@ -72,6 +73,15 @@ public class XMemcachedCacheManager extends AbstractTransactionSupportingCacheMa
         return new XMemcachedCacheWrapper(cache);
     }
 
+    @Override
+    protected XMemcachedCache getMissingCache(String name) {
+        XMemcachedCacheProperties properties = new XMemcachedCacheProperties(
+                this.computeTtl(name),
+                this.allowNullValues
+        );
+        return this.createCache(name, properties);
+    }
+
     /**
      * Configuration hook for creating {@link XMemcachedCache} with given name and {@link XMemcachedCacheProperties}.
      *
@@ -82,7 +92,7 @@ public class XMemcachedCacheManager extends AbstractTransactionSupportingCacheMa
         return new XMemcachedCache(name, properties.getExpire(), memcachedClient, properties.isAllowNullValues());
     }
 
-    private void doWith(final Class clazz) {
+    private void doWith(final Class<?> clazz) {
         ReflectionUtils.doWithMethods(clazz, method -> {
                     ReflectionUtils.makeAccessible(method);
                     Cacheable cacheable = AnnotationUtils.findAnnotation(method, Cacheable.class);
@@ -110,37 +120,31 @@ public class XMemcachedCacheManager extends AbstractTransactionSupportingCacheMa
                 return;
             }
             int expire;
-            boolean allowNullValues;
             // 没有配置 @Expired 注解的情况，使用全局配置
             if (expired == null) {
                 expire = this.grobalExpire;
-                allowNullValues = this.allowNullValues;
                 if (log.isWarnEnabled()) {
-                    log.warn("Use global configuration. cacheName: {}, expire: {}s, allowNullValues: {}",
+                    log.warn("Use global configuration. cacheName: {}, expire: {}s",
                             cacheName,
-                            expire,
-                            allowNullValues
+                            expire
                     );
                 }
             } else {
                 // 如果过期时间配置小于等于0，则不过期
                 expire = expired.value();
-                allowNullValues = expired.allowNullValues();
                 if (expire > 0) {
                     if (log.isInfoEnabled()) {
-                        log.info("Custom configuration. cacheName: {}, expire: {}s, allowNullValues: {}",
+                        log.info("Custom configuration. cacheName: {}, expire: {}s",
                                 cacheName,
-                                expire,
-                                expired.allowNullValues()
+                                expire
                         );
                     }
                 } else {
                     expire = 0;
                     if (log.isWarnEnabled()) {
-                        log.warn("Custom configuration. cacheName: {}, expire: {}s, allowNullValues: {}",
+                        log.warn("Custom configuration. cacheName: {}, expire: {}s",
                                 cacheName,
-                                expire,
-                                expired.allowNullValues()
+                                expire
                         );
                     }
                 }
@@ -148,9 +152,19 @@ public class XMemcachedCacheManager extends AbstractTransactionSupportingCacheMa
             // 缓存配置
             XMemcachedCacheProperties properties = new XMemcachedCacheProperties(
                     expire,
-                    allowNullValues
+                    this.allowNullValues
             );
             initialCacheConfiguration.put(cacheName, properties);
         }
+    }
+
+    Pattern pattern = Pattern.compile("\\.exp_(\\d+)");
+
+    private int computeTtl(String cacheName) {
+        Matcher matcher = pattern.matcher(cacheName);
+        if (matcher.find()) {
+            return Integer.parseInt(matcher.group(1));
+        }
+        return this.grobalExpire;
     }
 }

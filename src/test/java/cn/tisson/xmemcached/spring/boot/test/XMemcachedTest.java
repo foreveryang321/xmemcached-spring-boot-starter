@@ -14,10 +14,16 @@ public class XMemcachedTest extends TestCase {
     private TestService testService;
 
     @Test
-    public void add() {
-        Map<String, Object> map = testService.add("yangli");
+    public void get() {
+        Map<String, Object> map = testService.get("yangli");
         System.out.println(map);
-        Map<String, Object> yangli123 = testService.put("yangli123");
-        System.out.println(yangli123);
+    }
+
+    @Test
+    public void getSupportSpEl() {
+        Map<String, Object> map = testService.get("yangli", 300);
+        System.out.println(map);
+        map = testService.get("yangli", 300);
+        System.out.println(map);
     }
 }

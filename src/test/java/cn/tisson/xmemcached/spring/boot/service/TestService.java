@@ -15,21 +15,28 @@ import java.util.Map;
 @Slf4j
 public class TestService {
 
-    @Cacheable(cacheNames = "add", key = "#p0", unless = "#result eq null")
+    @Cacheable(cacheNames = "get", key = "#p0", unless = "#result eq null")
     @Expired(90)
-    public Map<String, Object> add(String name) {
+    public Map<String, Object> get(String name) {
         Map<String, Object> map = new HashMap<>();
-        map.put("name", name);
         map.put("id", System.currentTimeMillis());
+        map.put("name", name);
         log.info("map: {}", map);
         return map;
     }
 
-    @Cacheable(cacheNames = "put", key = "#p0", unless = "#result eq null")
-    public Map<String, Object> put(String name) {
+    /**
+     * 使用 SpEl 表达式配置过期时间
+     */
+    @Cacheable(cacheNames = "get", key = "#p0", unless = "#result eq null")
+    @Expired(expire = 90, spEl = "#expire")
+    // @Expired(expire = 90, spEl = "#p1")
+    // @Expired(expire = 90, spEl = "#a1")
+    public Map<String, Object> get(String name, int expire) {
         Map<String, Object> map = new HashMap<>();
-        map.put("name", name);
         map.put("id", System.currentTimeMillis());
+        map.put("name", name);
+        map.put("expire", expire);
         log.info("map: {}", map);
         return map;
     }

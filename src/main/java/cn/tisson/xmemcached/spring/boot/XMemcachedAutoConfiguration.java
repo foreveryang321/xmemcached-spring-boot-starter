@@ -1,6 +1,8 @@
 package cn.tisson.xmemcached.spring.boot;
 
 import cn.tisson.xmemcached.spring.boot.anno.EnableXMemcachedConfiguration;
+import cn.tisson.xmemcached.spring.boot.cache.TKeyGenerator;
+import cn.tisson.xmemcached.spring.boot.cache.TSimpleCacheResolver;
 import cn.tisson.xmemcached.spring.boot.cache.XMemcachedCacheManager;
 import cn.tisson.xmemcached.spring.boot.config.XMemcachedProperties;
 import cn.tisson.xmemcached.spring.boot.factory.XMemcacheClientFactory;
@@ -13,6 +15,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CachingConfigurerSupport;
+import org.springframework.cache.interceptor.CacheResolver;
+import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -28,8 +33,8 @@ import java.io.IOException;
         EnableXMemcachedConfiguration.class
 })
 @ConditionalOnClass({XMemcachedClient.class, XMemcachedClientBuilder.class})
-@EnableConfigurationProperties(XMemcachedProperties.class)
-public class XMemcachedAutoConfiguration {
+@EnableConfigurationProperties({XMemcachedProperties.class})
+public class XMemcachedAutoConfiguration extends CachingConfigurerSupport {
     private final XMemcachedProperties xMemcachedProperties;
 
     public XMemcachedAutoConfiguration(XMemcachedProperties xMemcachedProperties) {
@@ -38,15 +43,31 @@ public class XMemcachedAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(name = "memcachedClient")
-    public MemcachedClient memcachedClient() throws IOException {
-        return new XMemcacheClientFactory().create(xMemcachedProperties);
+    public MemcachedClient memcachedClient() {
+        try {
+            return new XMemcacheClientFactory().create(xMemcachedProperties);
+        } catch (IOException e) {
+            // ignore
+        }
+        return null;
     }
 
     @Bean
-    @ConditionalOnMissingBean(CacheManager.class)
-    public XMemcachedCacheManager cacheManager(MemcachedClient memcachedClient) {
+    @Override
+    public KeyGenerator keyGenerator() {
+        return new TKeyGenerator();
+    }
+
+    @Override
+    public CacheResolver cacheResolver() {
+        return new TSimpleCacheResolver(cacheManager());
+    }
+
+    @Bean
+    @Override
+    public CacheManager cacheManager() {
         return new XMemcachedCacheManager(
-                memcachedClient,
+                memcachedClient(),
                 xMemcachedProperties.getExpire(),
                 xMemcachedProperties.isAllowNullValues()
         );
