@@ -52,7 +52,6 @@ public class XMemcachedAutoConfiguration extends CachingConfigurerSupport {
         return null;
     }
 
-    @Bean
     @Override
     public KeyGenerator keyGenerator() {
         return new TKeyGenerator();
@@ -63,7 +62,6 @@ public class XMemcachedAutoConfiguration extends CachingConfigurerSupport {
         return new TSimpleCacheResolver(cacheManager());
     }
 
-    @Bean
     @Override
     public CacheManager cacheManager() {
         return new XMemcachedCacheManager(
