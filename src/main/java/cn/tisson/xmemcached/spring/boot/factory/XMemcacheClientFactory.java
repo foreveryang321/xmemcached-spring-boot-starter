@@ -45,6 +45,9 @@ public class XMemcacheClientFactory {
             builder = new XMemcachedClientBuilder(conf.getAddress());
         }
 
+        // 序列化、反序列化
+        // builder.setTranscoder();
+
         builder.setConnectTimeout(conf.getConnectTimeout());
         builder.setConnectionPoolSize(conf.getConnectionPoolSize());
 

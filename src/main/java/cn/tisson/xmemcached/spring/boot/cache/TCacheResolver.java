@@ -1,6 +1,7 @@
 package cn.tisson.xmemcached.spring.boot.cache;
 
 import cn.tisson.xmemcached.spring.boot.anno.Expired;
+import cn.tisson.xmemcached.spring.boot.util.CacheUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.interceptor.AbstractCacheResolver;
@@ -32,8 +33,9 @@ import java.util.Set;
  * @author YL
  */
 @Slf4j
-public class TSimpleCacheResolver extends AbstractCacheResolver {
-    public TSimpleCacheResolver(CacheManager cacheManager) {
+public class TCacheResolver extends AbstractCacheResolver {
+    
+    public TCacheResolver(CacheManager cacheManager) {
         super(cacheManager);
     }
 
@@ -46,7 +48,7 @@ public class TSimpleCacheResolver extends AbstractCacheResolver {
         Object[] args = context.getArgs();
         Set<String> cacheNames = context.getOperation().getCacheNames();
         Expired expired = AnnotationUtils.findAnnotation(method, Expired.class);
-        if (expired == null || StringUtils.isEmpty(expired.spEl())) {
+        if (expired == null || StringUtils.isEmpty(expired.el())) {
             return cacheNames;
         }
         // Shortcut if no args need to be loaded
@@ -77,14 +79,14 @@ public class TSimpleCacheResolver extends AbstractCacheResolver {
                 eval.setVariable(paramNames[i], value);
             }
         }
-        Expression expression = parser.parseExpression(expired.spEl());
-        Long ttl = expression.getValue(eval, Long.class);
-        if (ttl != null && ttl <= 0) {
+        Expression expression = parser.parseExpression(expired.el());
+        Integer ttl = expression.getValue(eval, Integer.class);
+        if (ttl == null || ttl <= 0) {
             return cacheNames;
         }
         Set<String> names = new HashSet<>();
         for (String cacheName : cacheNames) {
-            names.add(cacheName + ".exp_" + ttl);
+            names.add(CacheUtils.buildCacheNameForTtl(cacheName, ttl));
         }
         return names;
     }

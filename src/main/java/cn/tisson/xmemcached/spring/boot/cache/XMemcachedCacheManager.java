@@ -21,8 +21,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @author YL
@@ -76,7 +74,7 @@ public class XMemcachedCacheManager extends AbstractTransactionSupportingCacheMa
     @Override
     protected XMemcachedCache getMissingCache(String name) {
         XMemcachedCacheProperties properties = new XMemcachedCacheProperties(
-                this.computeTtl(name),
+                CacheUtils.computeTtl(name, this.grobalExpire),
                 this.allowNullValues
         );
         return this.createCache(name, properties);
@@ -130,9 +128,9 @@ public class XMemcachedCacheManager extends AbstractTransactionSupportingCacheMa
                     );
                 }
             } else {
-                // 如果过期时间配置小于等于0，则不过期
+                // 如果过期时间配置等于0，则不过期
                 expire = expired.value();
-                if (expire > 0) {
+                if (expire >= 0) {
                     if (log.isInfoEnabled()) {
                         log.info("Custom configuration. cacheName: {}, expire: {}s",
                                 cacheName,
@@ -140,7 +138,7 @@ public class XMemcachedCacheManager extends AbstractTransactionSupportingCacheMa
                         );
                     }
                 } else {
-                    expire = 0;
+                    expire = this.grobalExpire;
                     if (log.isWarnEnabled()) {
                         log.warn("Custom configuration. cacheName: {}, expire: {}s",
                                 cacheName,
@@ -156,15 +154,5 @@ public class XMemcachedCacheManager extends AbstractTransactionSupportingCacheMa
             );
             initialCacheConfiguration.put(cacheName, properties);
         }
-    }
-
-    Pattern pattern = Pattern.compile("\\.exp_(\\d+)");
-
-    private int computeTtl(String cacheName) {
-        Matcher matcher = pattern.matcher(cacheName);
-        if (matcher.find()) {
-            return Integer.parseInt(matcher.group(1));
-        }
-        return this.grobalExpire;
     }
 }

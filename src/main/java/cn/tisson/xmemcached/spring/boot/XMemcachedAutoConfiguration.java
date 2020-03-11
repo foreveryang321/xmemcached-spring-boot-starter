@@ -1,8 +1,8 @@
 package cn.tisson.xmemcached.spring.boot;
 
 import cn.tisson.xmemcached.spring.boot.anno.EnableXMemcachedConfiguration;
+import cn.tisson.xmemcached.spring.boot.cache.TCacheResolver;
 import cn.tisson.xmemcached.spring.boot.cache.TKeyGenerator;
-import cn.tisson.xmemcached.spring.boot.cache.TSimpleCacheResolver;
 import cn.tisson.xmemcached.spring.boot.cache.XMemcachedCacheManager;
 import cn.tisson.xmemcached.spring.boot.config.XMemcachedProperties;
 import cn.tisson.xmemcached.spring.boot.factory.XMemcacheClientFactory;
@@ -59,9 +59,10 @@ public class XMemcachedAutoConfiguration extends CachingConfigurerSupport {
 
     @Override
     public CacheResolver cacheResolver() {
-        return new TSimpleCacheResolver(cacheManager());
+        return new TCacheResolver(cacheManager());
     }
 
+    @Bean
     @Override
     public CacheManager cacheManager() {
         return new XMemcachedCacheManager(

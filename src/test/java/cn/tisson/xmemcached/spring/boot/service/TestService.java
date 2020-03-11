@@ -29,9 +29,9 @@ public class TestService {
      * 使用 SpEl 表达式配置过期时间
      */
     @Cacheable(cacheNames = "get", key = "#p0", unless = "#result eq null")
-    @Expired(expire = 90, spEl = "#expire")
-    // @Expired(expire = 90, spEl = "#p1")
-    // @Expired(expire = 90, spEl = "#a1")
+    @Expired(value = 90, el = "#expire")
+    // @Expired(expire = 90, el = "#p1")
+    // @Expired(expire = 90, el = "#a1")
     public Map<String, Object> get(String name, int expire) {
         Map<String, Object> map = new HashMap<>();
         map.put("id", System.currentTimeMillis());
