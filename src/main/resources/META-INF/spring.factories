@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-cn.tisson.xmemcached.spring.boot.XMemcachedAutoConfiguration
+top.ylonline.xmemcached.spring.boot.XMemcachedAutoConfiguration

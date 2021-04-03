@@ -1,9 +1,8 @@
 spring:
   application:
     name: xmemcached-spring-boot-starter
-ts:
-  xmemcached:
-    address: 10.121.22.128:12200
+xmemcached:
+    address: 127.0.0.1:12200
     expire: 60
     allow-null-values: false
     command-factory: binary
